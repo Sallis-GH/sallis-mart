@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import { config } from './src/config/config'
 import Logging from './src/library/logging'
-import bodyParser from 'body-parser'
+import userRoutes from './src/routes/api/users/User'
 
 dotenv.config()
 
@@ -46,17 +46,17 @@ const startServer = () => {
   })
 
   /** ROUTES */
+  app.use('/api/users', userRoutes)
 
-
-  /**Healthcheck */
+  /** Healthcheck */
   app.get('/ping', (req, res, next) => res.status(200).json({ message: 'pong' }))
 
-  /**Error Handling */
+  /** Error Handling */
   app.use((req, res, next) => {
-    const error = new Error('Not Found')
+    const error = new Error('Not Found [error handling]')
     Logging.error(error)
 
-    return res.status(404).json({message: error.message})
+    return res.status(404).json({message: `${error.message}`})
   })
 
   app.listen(config.server.port, () => Logging.info(`⚡Server is running on port ${config.server.port}⚡`))

@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = require("./src/config/config");
 const logging_1 = __importDefault(require("./src/library/logging"));
+const User_1 = __importDefault(require("./src/routes/api/users/User"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 mongoose_1.default.set('strictQuery', false);
@@ -40,13 +41,14 @@ const startServer = () => {
         next();
     });
     /** ROUTES */
-    /**Healthcheck */
+    app.use('/api/users', User_1.default);
+    /** Healthcheck */
     app.get('/ping', (req, res, next) => res.status(200).json({ message: 'pong' }));
-    /**Error Handling */
+    /** Error Handling */
     app.use((req, res, next) => {
-        const error = new Error('Not Found');
+        const error = new Error('Not Found [error handling]');
         logging_1.default.error(error);
-        return res.status(404).json({ message: error.message });
+        return res.status(404).json({ message: `${error.message}` });
     });
     app.listen(config_1.config.server.port, () => logging_1.default.info(`⚡Server is running on port ${config_1.config.server.port}⚡`));
 };
