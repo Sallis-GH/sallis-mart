@@ -7,11 +7,12 @@ import Logging from './src/library/logging'
 import userRoutes from './src/routes/api/users/User'
 
 dotenv.config()
-
+const dbName = process.env.MONGO_DB_NAME
+console.log(dbName)
 const app: Express = express()
 
 mongoose.set('strictQuery', false)
-mongoose.connect(config.mongo.url, { retryWrites: true, w: 'majority' })
+mongoose.connect(config.mongo.url, {dbName:'Sallis-Mart', retryWrites: true, w: 'majority' })
   .then(() => {
     Logging.info('Connected to mongoDB')
     startServer()
