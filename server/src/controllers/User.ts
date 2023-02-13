@@ -1,16 +1,18 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import User from "../models/User";
+import bcrypt from 'bcryptjs'
 
-const createUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, email, password, role, storeId } = req.body
-  console.log('hihi', req.body)
+
+const createUser = async (req: Request, res: Response, next: NextFunction) => {
+  const { name, email, password, role, storeId } = req?.body
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   const user = new User({
     _id: new mongoose.Types.ObjectId(),
     name,
     email,
-    password,
+    password: hashedPassword,
     role,
     storeId
   })
@@ -42,7 +44,7 @@ const updateUser = (req: Request, res: Response, next: NextFunction) => {
   return User.findById(userID)
     .then(user => {
       if (user) {
-        user.set(req.body)
+        user.set(req?.body)
 
         return user
           .save()

@@ -1,10 +1,13 @@
 import express, { Express, Request, Response } from 'express'
-import http from 'http'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import { config } from './src/config/config'
 import Logging from './src/library/logging'
 import userRoutes from './src/routes/api/users/User'
+import passport, { authenticate } from "passport";
+import passportLocal from "passport-local"
+
+const LocalStrategy = passportLocal.Strategy
 
 dotenv.config()
 const dbName = process.env.MONGO_DB_NAME
@@ -33,6 +36,8 @@ const startServer = () => {
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
+  app.use(passport.initialize)
+  app.use(passport.session)
 
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
@@ -46,6 +51,9 @@ const startServer = () => {
   })
 
   /** ROUTES */
+  app.post('/login', authenticate('local'), (req, res) => {
+    res.send("Successfully Authenticated")
+  })
   app.use('/api/users', userRoutes)
 
   /** Healthcheck */
