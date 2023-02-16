@@ -4,17 +4,15 @@ import mongoose from 'mongoose'
 import { config } from './src/config/config'
 import Logging from './src/library/logging'
 import userRoutes from './src/routes/api/users/User'
-import passport, { authenticate } from "passport";
-import passportLocal from "passport-local"
-
-const LocalStrategy = passportLocal.Strategy
+import passport from "passport";
+import session from 'express-session'
 
 dotenv.config()
 const dbName = process.env.MONGO_DB_NAME
 const app: Express = express()
 
 mongoose.set('strictQuery', false)
-mongoose.connect(config.mongo.url, {dbName, retryWrites: true, w: 'majority' })
+mongoose.connect(config.mongo.url, { dbName, retryWrites: true, w: 'majority' })
   .then(() => {
     Logging.info('Connected to mongoDB')
     startServer()
@@ -36,8 +34,15 @@ const startServer = () => {
 
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
-  app.use(passport.initialize)
-  app.use(passport.session)
+  app.use(
+    session({
+      secret: "secretcode",
+      resave: true,
+      saveUninitialized: true,
+    })
+  );
+  app.use(passport.session())
+  app.use(passport.initialize())
 
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
@@ -51,9 +56,6 @@ const startServer = () => {
   })
 
   /** ROUTES */
-  app.post('/login', authenticate('local'), (req, res) => {
-    res.send("Successfully Authenticated")
-  })
   app.use('/api/users', userRoutes)
 
   /** Healthcheck */
@@ -64,7 +66,7 @@ const startServer = () => {
     const error = new Error('Not Found [error handling]')
     Logging.error(error)
 
-    return res.status(404).json({message: `${error.message}`})
+    return res.status(404).json({ message: `${error.message}` })
   })
 
   app.listen(config.server.port, () => Logging.info(`⚡Server is running on port ${config.server.port}⚡`))

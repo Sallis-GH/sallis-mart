@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-import User from "../models/User";
+import User, { IUserModel } from "../models/User";
 import bcrypt from 'bcryptjs'
+import passportLocal from 'passport-local';
+import passport from "passport";
 
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -66,5 +68,30 @@ const deleteUser = (req: Request, res: Response, next: NextFunction) => {
       : res.status(404).json({ message: 'Not Found [delete]' }))
     .catch(error => res.status(500).json({ message: error }))
 }
+
+
+const LocalStrategy = passportLocal.Strategy
+passport.use('login', new LocalStrategy((username: string, password: string, done) => {
+  let newUser;
+  User.findOne({ name: username }, (err: Error, user: IUserModel) => {
+    if (err) throw err;
+    if (!user) return done(null, false);
+    console.log(user)
+    newUser = user 
+    bcrypt.compare(password, newUser.password, (err: Error, result: boolean) => {
+      if (err) throw err;
+      if (result === true) {
+        return done(null, user._id);
+      } else {
+        return done(null, false);
+      }
+    });
+  });
+})
+);
+
+
+
+
 
 export default { createUser, readUser, readAllUsers, updateUser, deleteUser }

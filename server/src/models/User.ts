@@ -1,15 +1,15 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+
 export interface IUser {
   name: string
   email: string,
   password: string,
-  role: string[],
-  storeId: string,
 }
 
 export interface IUserModel extends IUser, Document {
-
+  role: string[],
+  storeId: string,
 }
 
 const UserSchema: Schema = new Schema(
@@ -24,5 +24,6 @@ const UserSchema: Schema = new Schema(
     versionKey: false
   }
 )
+
 
 export default mongoose.model<IUserModel>('Users', UserSchema)
